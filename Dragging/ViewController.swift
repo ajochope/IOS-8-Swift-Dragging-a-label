@@ -9,7 +9,10 @@
 import UIKit
 
 class ViewController: UIViewController {
-
+    
+    // for track the gesture distance
+    var xFromCenter: CGFloat = 0
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view, typically from a nib.
@@ -33,6 +36,10 @@ class ViewController: UIViewController {
         let translation = gesture.translationInView(self.view) // get the translation
         var label = gesture.view! // the view inside the gesture
         
+        xFromCenter += translation.x
+        
+        var scaledValue = min(100 / abs(xFromCenter), 1)
+        
         // move the label with the translation
         label.center = CGPoint(x: label.center.x + translation.x, y: label.center.y + translation.y)
         
@@ -40,7 +47,35 @@ class ViewController: UIViewController {
         gesture.setTranslation(CGPointZero, inView: self.view)
         
         
-        println("dragged detected!!")
+        // the rotation variable clockwise and pass the angle in radians 1 = 60º
+        var rotation:CGAffineTransform = CGAffineTransformMakeRotation(xFromCenter / 200)
+        
+        // the scale variable to enlarge objects
+        var stretch:CGAffineTransform = CGAffineTransformScale(rotation, scaledValue, scaledValue)
+        
+        label.transform = stretch
+        
+        
+        if label.center.x < 100 {
+            
+            println("Not chosen !!")
+        
+        } else if label.center.x > self.view.bounds.width - 100 {
+            
+            println("Chosen !!")
+        }
+        
+        if gesture.state == UIGestureRecognizerState.Ended {
+        
+            // restore the inital value before drag the item
+            label.center = CGPointMake(self.view.bounds.width / 2, self.view.bounds.height / 2)
+            scaledValue = min(abs(xFromCenter)/100, 1)
+            rotation = CGAffineTransformMakeRotation(0)
+            stretch = CGAffineTransformScale(rotation, scaledValue, scaledValue)
+    
+            label.transform = stretch
+        }
+       
     }
     
     
